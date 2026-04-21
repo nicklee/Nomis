@@ -31,14 +31,25 @@ export default function DatasetDiscovery({
   const availableGeos = useMemo(() => Array.from(new Set(datasets.map(d => d.geographyCoverage))), [datasets]);
   const availableTopics = useMemo(() => {
     const themes = datasets.flatMap(d => d.themes);
-    return Array.from(new Set(themes)).sort();
+    const unique = Array.from(new Set(themes)).filter(t => t !== 'Census');
+    const hasCensus2021 = datasets.some(d => d.source === 'Census 2021');
+    const hasCensus2011 = datasets.some(d => d.source === 'Census 2011');
+    if (hasCensus2021) unique.push('Census 2021');
+    if (hasCensus2011) unique.push('Census 2011');
+    return unique.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }, [datasets]);
 
   const filteredDatasets = useMemo(() => {
     return datasets.filter(dataset => {
       const sourceMatch = activeSources.length === 0 || activeSources.includes(dataset.source);
       const geoMatch = activeGeos.length === 0 || activeGeos.includes(dataset.geographyCoverage);
-      const topicMatch = activeTopics.length === 0 || dataset.themes.some(t => activeTopics.includes(t));
+      const topicMatch =
+        activeTopics.length === 0 ||
+        activeTopics.some(topic => {
+          if (topic === 'Census 2021') return dataset.source === 'Census 2021';
+          if (topic === 'Census 2011') return dataset.source === 'Census 2011';
+          return dataset.themes.includes(topic);
+        });
       
       const year = parseInt(dataset.lastUpdated.split(' ').pop() || '0');
       const from = dateFrom ? parseInt(dateFrom) : -Infinity;
