@@ -23,7 +23,7 @@ import QueryBuilder from './components/QueryBuilder';
 import DatasetOverview from './components/DatasetOverview';
 import { Dataset, QueryState } from './types';
 import { datasets } from './mockData';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 
 function datasetById(id: string | undefined): Dataset | undefined {
   if (!id) return undefined;
@@ -99,31 +99,30 @@ function AppLayout({
         onSelectDataset={handleSelectDataset}
       />
 
-      <main className="flex-grow">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname + location.search}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Outlet
-              context={{
-                filteredDatasets,
-                searchQuery,
-                selectedTheme,
-                handleSearch,
-                handleSelectTheme,
-                handleStartExploring,
-                handleSelectDataset,
-                handleQueryComplete,
-                finalQueryState,
-                setFinalQueryState,
-              }}
-            />
-          </motion.div>
-        </AnimatePresence>
+      <main className="flex-grow min-h-0">
+        {/* Route key forces remount; avoid AnimatePresence mode="wait" + opacity exit —
+            that combo can leave main content stuck invisible after navigate home */}
+        <motion.div
+          key={location.pathname + location.search}
+          initial={false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+        >
+          <Outlet
+            context={{
+              filteredDatasets,
+              searchQuery,
+              selectedTheme,
+              handleSearch,
+              handleSelectTheme,
+              handleStartExploring,
+              handleSelectDataset,
+              handleQueryComplete,
+              finalQueryState,
+              setFinalQueryState,
+            }}
+          />
+        </motion.div>
       </main>
 
       <Footer />

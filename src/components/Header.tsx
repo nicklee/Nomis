@@ -25,8 +25,9 @@ export default function Header({ onHome, onSearch, onSelectDataset }: HeaderProp
   return (
     <header className="bg-ons-blue text-white h-16 flex items-center justify-between px-6 shrink-0 shadow-md z-50">
       <div className="flex items-center gap-4">
-        <button 
-          onClick={onHome}
+        <button
+          type="button"
+          onClick={() => onHome?.()}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div className="bg-white text-ons-blue px-2 py-1 font-bold text-lg leading-none">ONS</div>
