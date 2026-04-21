@@ -43,7 +43,7 @@ export default function Header({ onHome, onSearch, onSelectDataset }: HeaderProp
             onFocus={() => setShowResults(true)}
             onBlur={() => setTimeout(() => setShowResults(false), 200)}
             className="bg-white/15 border-none py-2 pl-10 pr-4 rounded text-sm w-96 placeholder:text-white/60 focus:outline-none focus:bg-white/25 transition-all"
-            placeholder="Search datasets (e.g. Labour Market)"
+            placeholder="Search datasets (e.g. Labour market)"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && onSearch) {
                 onSearch(localSearch);
@@ -96,9 +96,9 @@ export default function Header({ onHome, onSearch, onSelectDataset }: HeaderProp
       
       <div className="flex items-center gap-6 text-sm">
         <nav className="hidden md:flex gap-6 font-medium">
-          <button onClick={() => onSearch?.('')} className="hover:text-blue-200 transition-colors">Data</button>
+          <button onClick={() => onSearch?.('')} className="hover:text-blue-200 transition-colors">Datasets</button>
           <a href="#" className="hover:text-blue-200 transition-colors">Reports</a>
-          <a href="#" className="hover:text-blue-200 transition-colors">API</a>
+          <a href="#" className="hover:text-blue-200 transition-colors">API docs</a>
         </nav>
         <div className="h-4 w-px bg-white/20 hidden md:block"></div>
         <div className="flex items-center gap-4">

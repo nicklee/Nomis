@@ -22,19 +22,16 @@ export default function DatasetDiscovery({
   const [activeSources, setActiveSources] = useState<string[]>([]);
   const [activeGeos, setActiveGeos] = useState<string[]>([]);
   const [activeTopics, setActiveTopics] = useState<string[]>([]);
-  const [activeYears, setActiveYears] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [localSearch, setLocalSearch] = useState('');
 
-  // Extract unique sources, geographies, topics and years from the datasets provided
+  // Extract unique sources, geographies, and topics from the datasets provided
   const availableSources = useMemo(() => Array.from(new Set(datasets.map(d => d.source))), [datasets]);
   const availableGeos = useMemo(() => Array.from(new Set(datasets.map(d => d.geographyCoverage))), [datasets]);
   const availableTopics = useMemo(() => {
     const themes = datasets.flatMap(d => d.themes);
     return Array.from(new Set(themes)).sort();
-  }, [datasets]);
-  const availableYears = useMemo(() => {
-    const years = datasets.map(d => d.lastUpdated.split(' ').pop() || '');
-    return Array.from(new Set(years)).filter(Boolean).sort((a, b) => b.localeCompare(a));
   }, [datasets]);
 
   const filteredDatasets = useMemo(() => {
@@ -42,13 +39,18 @@ export default function DatasetDiscovery({
       const sourceMatch = activeSources.length === 0 || activeSources.includes(dataset.source);
       const geoMatch = activeGeos.length === 0 || activeGeos.includes(dataset.geographyCoverage);
       const topicMatch = activeTopics.length === 0 || dataset.themes.some(t => activeTopics.includes(t));
-      const yearMatch = activeYears.length === 0 || activeYears.includes(dataset.lastUpdated.split(' ').pop() || '');
+      
+      const year = parseInt(dataset.lastUpdated.split(' ').pop() || '0');
+      const from = dateFrom ? parseInt(dateFrom) : -Infinity;
+      const to = dateTo ? parseInt(dateTo) : Infinity;
+      const dateMatch = year >= from && year <= to;
+
       const textMatch = !localSearch || 
         dataset.title.toLowerCase().includes(localSearch.toLowerCase()) || 
         dataset.description.toLowerCase().includes(localSearch.toLowerCase());
-      return sourceMatch && geoMatch && topicMatch && yearMatch && textMatch;
+      return sourceMatch && geoMatch && topicMatch && dateMatch && textMatch;
     });
-  }, [datasets, activeSources, activeGeos, activeTopics, activeYears, localSearch]);
+  }, [datasets, activeSources, activeGeos, activeTopics, dateFrom, dateTo, localSearch]);
 
   const toggleSource = (source: string) => {
     setActiveSources(prev => 
@@ -68,17 +70,12 @@ export default function DatasetDiscovery({
     );
   };
 
-  const toggleYear = (year: string) => {
-    setActiveYears(prev => 
-      prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]
-    );
-  };
-
   const clearFilters = () => {
     setActiveSources([]);
     setActiveGeos([]);
     setActiveTopics([]);
-    setActiveYears([]);
+    setDateFrom('');
+    setDateTo('');
   };
 
   return (
@@ -92,7 +89,7 @@ export default function DatasetDiscovery({
                 <Filter className="w-4 h-4 text-gray-500" />
                 <h3 className="font-bold text-ons-text">Filter results</h3>
               </div>
-              {(activeSources.length > 0 || activeGeos.length > 0 || activeTopics.length > 0 || activeYears.length > 0 || searchQuery || selectedTheme || localSearch) && (
+              {(activeSources.length > 0 || activeGeos.length > 0 || activeTopics.length > 0 || dateFrom || dateTo || searchQuery || selectedTheme || localSearch) && (
                 <button 
                   onClick={() => {
                     clearFilters();
@@ -118,6 +115,27 @@ export default function DatasetDiscovery({
                     onChange={(e) => setLocalSearch(e.target.value)}
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Date range</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    placeholder="From"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full px-2 py-1.5 text-sm border border-ons-border rounded focus:border-ons-link focus:outline-none placeholder:text-gray-300"
+                  />
+                  <span className="text-gray-400 text-xs text-center">—</span>
+                  <input 
+                    type="number" 
+                    placeholder="To"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full px-2 py-1.5 text-sm border border-ons-border rounded focus:border-ons-link focus:outline-none placeholder:text-gray-300"
+                  />
                 </div>
               </div>
 
@@ -178,24 +196,6 @@ export default function DatasetDiscovery({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Year Updated</label>
-                <div className="space-y-2">
-                  {availableYears.map(year => (
-                    <label key={year} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-ons-link group">
-                      <input 
-                        type="checkbox" 
-                        className="rounded text-ons-link focus:ring-ons-link" 
-                        checked={activeYears.includes(year)}
-                        onChange={() => toggleYear(year)}
-                      />
-                      <span className={activeYears.includes(year) ? 'font-semibold text-ons-link' : ''}>
-                        {year}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </aside>
@@ -242,15 +242,22 @@ export default function DatasetDiscovery({
                   {g} <X className="w-3 h-3" />
                 </button>
               ))}
-              {activeYears.map(y => (
+              {dateFrom && (
                 <button 
-                  key={y} 
-                  onClick={() => toggleYear(y)}
+                  onClick={() => setDateFrom('')}
                   className="flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold rounded-full border border-orange-100 hover:bg-orange-100 transition-colors"
                 >
-                  {y} <X className="w-3 h-3" />
+                  From: {dateFrom} <X className="w-3 h-3" />
                 </button>
-              ))}
+              )}
+              {dateTo && (
+                <button 
+                  onClick={() => setDateTo('')}
+                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold rounded-full border border-orange-100 hover:bg-orange-100 transition-colors"
+                >
+                  To: {dateTo} <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
           </div>
 

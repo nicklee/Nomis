@@ -79,7 +79,7 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold text-ons-blue mb-4 tracking-tight"
           >
-            Official UK statistics for everyone
+            Find and download official UK statistics
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -87,8 +87,8 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
             transition={{ delay: 0.1 }}
             className="text-xl text-gray-600 mb-8"
           >
-            Access detailed datasets on population, the labour market, and more. 
-            Built for researchers, local authorities, and policy makers.
+            Explore data on population, employment, earnings, businesses, local areas and the Census. 
+            Access detailed, up-to-date statistics from the Office for National Statistics.
           </motion.p>
 
           <motion.div 
@@ -100,7 +100,7 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
-                placeholder="Search datasets (e.g. 'population estimates', 'mortality')"
+                placeholder="Search by keyword, topic or dataset name"
                 className="w-full pl-12 pr-32 py-4 rounded-lg border-2 border-ons-border focus:border-ons-blue focus:outline-none text-lg shadow-sm transition-all bg-white"
                 value={searchQuery}
                 onChange={(e) => {
@@ -170,8 +170,7 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <h3 className="text-3xl font-bold text-ons-blue mb-2 tracking-tight">Explore by topic</h3>
-              <p className="text-gray-500">The complete directory of official UK statistical datasets</p>
+              <h3 className="text-3xl font-bold text-ons-blue tracking-tight">Explore by topic</h3>
             </div>
             <button 
               onClick={onStartExploring}
@@ -264,12 +263,19 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
         </div>
       </section>
 
-      {/* Reports Section - Labour Market Profiles */}
+      {/* Reports Section */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h3 className="text-3xl font-bold text-ons-blue mb-2 tracking-tight">Labour Market Profiles & Reports</h3>
-            <p className="text-gray-500">Fast access to key area-based statistics and census insights</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <h3 className="text-3xl font-bold text-ons-blue tracking-tight">Reports</h3>
+            </div>
+            <button 
+              onClick={() => onSearch('Reports')}
+              className="text-ons-link font-bold flex items-center gap-1 hover:underline text-sm"
+            >
+              View all reports <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

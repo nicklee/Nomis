@@ -45,7 +45,7 @@ export default function DatasetOverview({ dataset, onNext, onBack }: DatasetOver
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Layers className="w-3 h-3" />
-                Variables available
+                Filters available
               </h3>
               <div className="flex flex-wrap gap-2">
                 {['Geography', 'Date', 'Age', 'Sex'].map(v => (
@@ -80,15 +80,15 @@ export default function DatasetOverview({ dataset, onNext, onBack }: DatasetOver
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <MapPin className="w-3 h-3" />
-                Coverage
+                Range
               </h3>
               <div className="space-y-2">
                 <div className="text-sm">
                   <span className="text-gray-500">Geography:</span>
-                  <span className="ml-2 font-medium text-gray-900">{dataset.geographyCoverage}</span>
+                  <span className="ml-2 font-medium text-gray-900">United Kingdom (Countries, Regions, Local Authorities)</span>
                 </div>
                 <div className="text-sm">
-                  <span className="text-gray-500">Time range:</span>
+                  <span className="text-gray-500">Date range:</span>
                   <span className="ml-2 font-medium text-gray-900">{dataset.timeRange}</span>
                 </div>
               </div>
@@ -122,7 +122,7 @@ export default function DatasetOverview({ dataset, onNext, onBack }: DatasetOver
             onClick={onNext}
             className="bg-ons-link text-white px-8 py-3 rounded-md font-bold hover:opacity-90 transition-all flex items-center gap-2 shadow-md"
           >
-            Customise your query
+            Filter data
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

@@ -6,8 +6,8 @@ export type GeographyType =
   | 'Regions' 
   | 'Combined authorities' 
   | 'Metropolitan counties' 
-  | 'Local authorities (county / unitary)' 
-  | 'Local authority districts (unitary / district)';
+  | 'Local authorities (county or unitary)' 
+  | 'Local authority districts (unitary or district)';
 
 export interface GeographyOption {
   id: string;

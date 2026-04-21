@@ -43,6 +43,45 @@ const steps: { id: StepId; label: string; icon: any }[] = [
   { id: 'review', label: 'Review & Export', icon: Eye },
 ];
 
+function Tooltip({ children, content, align = 'center' }: { children: React.ReactNode; content: string; align?: 'center' | 'left' | 'right' }) {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  const alignClasses = {
+    center: "left-1/2 -translate-x-1/2",
+    left: "left-0",
+    right: "right-0"
+  };
+
+  const arrowClasses = {
+    center: "left-1/2 -translate-x-1/2",
+    left: "left-4",
+    right: "right-4"
+  };
+  
+  return (
+    <div 
+      className="relative flex items-center" 
+      onMouseEnter={() => setIsVisible(true)} 
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 5 }}
+            className={`absolute z-[100] bottom-full ${alignClasses[align]} mb-2 w-48 p-3 bg-gray-900/95 backdrop-blur-sm text-white text-[11px] leading-relaxed rounded-lg shadow-2xl pointer-events-none ring-1 ring-white/10`}
+          >
+            {content}
+            <div className={`absolute top-full ${arrowClasses[align]} border-8 border-transparent border-t-gray-900/95`} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function QueryBuilder({ dataset, initialState, onCancel, onComplete }: QueryBuilderProps) {
   const [currentStep, setCurrentStep] = useState<StepId>('geography');
   const [geoSearch, setGeoSearch] = useState('');
@@ -219,10 +258,10 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
                 <button
                   key={method.id}
                   onClick={() => updateState({ geoSelectionMethod: method.id as GeographySelectionMethod })}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm transition-all border-b-2 -mb-px ${
+                  className={`flex items-center gap-2 px-6 py-3 text-sm transition-all border-b-2 -mb-px ${
                     queryState.geoSelectionMethod === method.id 
-                      ? 'border-ons-blue font-semibold text-ons-blue' 
-                      : 'border-transparent text-gray-500 hover:text-ons-blue'
+                      ? 'border-ons-blue font-bold text-ons-blue bg-blue-50/50' 
+                      : 'border-transparent text-gray-500 hover:text-ons-blue hover:bg-gray-50'
                   }`}
                 >
                   <method.icon className="w-4 h-4" />
@@ -269,13 +308,13 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
                                   "Regions",
                                   "Combined authorities",
                                   "Metropolitan counties",
-                                  "Local authorities (county / unitary)",
-                                  "Local authority districts (unitary / district)"
+                                  "Local authorities (county or unitary)",
+                                  "Local authority districts (unitary or district)"
                                 ]
                               : [
                                   "Metropolitan counties",
-                                  "Local authorities (county / unitary)",
-                                  "Local authority districts (unitary / district)"
+                                  "Local authorities (county or unitary)",
+                                  "Local authority districts (unitary or district)"
                                 ]
                             ).map(type => (
                               <button
@@ -316,15 +355,15 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
 
                       {/* Area Selection List (Alongside Types in Browse) */}
                       <div className="md:col-span-8 space-y-4">
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            placeholder={`Search ${queryState.geographyType}...`} 
-                            value={geoSearch}
-                            onChange={(e) => setGeoSearch(e.target.value)}
-                            className="w-full border border-ons-border p-2 pl-9 text-sm rounded-lg focus:outline-none focus:border-ons-blue shadow-sm"
-                          />
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-medium text-ons-blue">
+                            {queryState.geographyType === 'Countries' && "The four nations of the UK: England, Wales, Scotland, and Northern Ireland."}
+                            {queryState.geographyType === 'Regions' && "Large sub-national administrative areas in England used for statistical purposes."}
+                            {queryState.geographyType === 'Combined authorities' && "Groups of neighboring local councils that cooperate on strategic issues like transport and growth."}
+                            {queryState.geographyType === 'Metropolitan counties' && "Administrative areas covering highly urbanized regions around major English cities."}
+                            {queryState.geographyType === 'Local authorities (county or unitary)' && "Regional councils responsible for top-level strategic services like education and social care."}
+                            {queryState.geographyType === 'Local authority districts (unitary or district)' && "The more granular level of local government, representing individual towns, boroughs, or districts."}
+                          </p>
                         </div>
 
                         <div className="border border-ons-border rounded-lg bg-white overflow-hidden shadow-sm">
@@ -657,68 +696,76 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
         return (
           <div className="space-y-6">
             <div>
-              <label className="block font-semibold text-ons-text mb-1 text-[15px]">Select Age Groups</label>
-              <p className="text-xs text-gray-500 mb-4">Choose how you want to group ages</p>
+              <label className="block font-semibold text-ons-text mb-1 text-[15px]">Select Age</label>
               
-              <div className="flex border-b border-ons-border mb-6">
+              <div className="space-y-4">
                 {[
                   { id: 'labour', label: 'Labour market categories', desc: 'Common groupings used in labour market analysis' },
                   { id: 'bands', label: '5-year age bands', desc: 'Standard statistical groupings' },
-                  { id: 'single', label: 'Single year of age', desc: 'Detailed age selection' }
+                  { id: 'single', label: 'Specific ages', desc: 'Detailed age selection' }
                 ].map(mode => (
-                  <button
+                  <div 
                     key={mode.id}
-                    onClick={() => handleAgeModeChange(mode.id as AgeMode)}
-                    className={`px-4 py-2 text-sm transition-all border-b-2 -mb-px relative group ${
-                      ageMode === mode.id 
-                        ? 'border-ons-blue font-semibold text-ons-blue' 
-                        : 'border-transparent text-gray-500 hover:text-ons-blue'
-                    }`}
+                    className={`p-4 rounded-lg border transition-all ${ageMode === mode.id ? 'border-ons-blue bg-blue-50/50 shadow-sm' : 'border-ons-border hover:border-gray-300'}`}
                   >
-                    {mode.label}
-                    {/* Tooltip for description */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight">
-                      {mode.desc}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-800"></div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <label className={`flex items-start gap-3 cursor-pointer ${ageMode === mode.id ? 'mb-4' : ''}`}>
+                      <input 
+                        type="radio" 
+                        name="ageMode" 
+                        className="mt-1 text-ons-blue focus:ring-ons-blue"
+                        checked={ageMode === mode.id}
+                        onChange={() => handleAgeModeChange(mode.id as AgeMode)}
+                      />
+                      <div>
+                        <span className="block font-bold text-sm text-ons-blue">{mode.label}</span>
+                        <span className="block text-xs text-gray-500">{mode.desc}</span>
+                      </div>
+                    </label>
 
-            <div className="border border-ons-border rounded bg-[#fafafa] h-[400px] overflow-y-auto">
-              <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <input 
-                    type="checkbox" 
-                    className="rounded text-ons-blue"
-                    checked={ageDimensions[ageMode].every(age => queryState.selectedAges.includes(age))}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        updateState({ selectedAges: [...ageDimensions[ageMode]] });
-                      } else {
-                        // Keep at least one selected
-                        updateState({ selectedAges: [ageDimensions[ageMode][0]] });
-                      }
-                    }}
-                  />
-                  Select All
-                </label>
-                <span className="text-xs text-gray-400">
-                  {ageDimensions[ageMode].length} options
-                </span>
-              </div>
-              <div className="flex flex-col">
-                {ageDimensions[ageMode].map(age => (
-                  <label key={age} className="flex items-center gap-3 p-3 border-b border-gray-100 hover:bg-gray-100 cursor-pointer transition-colors text-sm">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded text-ons-blue focus:ring-ons-blue"
-                      checked={queryState.selectedAges.includes(age)}
-                      onChange={(e) => handleAgeChange(age, e.target.checked)}
-                    />
-                    {age.replace('Age ', '')}
-                  </label>
+                    {ageMode === mode.id && (
+                      <div className="ml-7 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="border border-ons-border rounded bg-white max-h-[300px] overflow-y-auto">
+                          <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
+                            {ageMode !== 'labour' ? (
+                              <label className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                                <input 
+                                  type="checkbox" 
+                                  className="rounded text-ons-blue"
+                                  checked={ageDimensions[ageMode].every(age => queryState.selectedAges.includes(age))}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      updateState({ selectedAges: [...ageDimensions[ageMode]] });
+                                    } else {
+                                      updateState({ selectedAges: [ageDimensions[ageMode][0]] });
+                                    }
+                                  }}
+                                />
+                                Select All
+                              </label>
+                            ) : (
+                              <div />
+                            )}
+                            <span className="text-[10px] text-gray-400 font-bold uppercase">
+                              {ageDimensions[ageMode].length} options
+                            </span>
+                          </div>
+                          <div className={`grid ${mode.id === 'single' ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8' : 'grid-cols-1'} gap-1 p-2`}>
+                            {ageDimensions[ageMode].map(age => (
+                              <label key={age} className={`flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 cursor-pointer transition-colors ${mode.id === 'single' ? '' : 'border-b border-gray-50 last:border-0'}`}>
+                                <input
+                                  type="checkbox"
+                                  className="w-3 h-3 rounded text-ons-blue focus:ring-ons-blue"
+                                  checked={queryState.selectedAges.includes(age)}
+                                  onChange={(e) => handleAgeChange(age, e.target.checked)}
+                                />
+                                <span className="text-[11px] font-medium text-gray-700">{age.replace('Age ', '')}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -753,41 +800,49 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
           .map(id => geographyOptions.find(o => o.id === id)?.name)
           .filter(Boolean);
         
-        const formatList = (list: any[], max: number = 3) => {
-          if (list.length <= max) return list.join(', ');
-          return `${list.slice(0, max).join(', ')} + ${list.length - max} more`;
+        const formatList = (list: any[]) => {
+          return list.join(', ');
         };
 
         return (
           <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 relative">
               <h3 className="text-lg font-bold text-ons-blue mb-4 flex items-center gap-2">
-                <Check className="w-5 h-5" />
                 Review your query
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Geography</span>
-                  <span className="text-sm font-semibold text-gray-900" title={selectedGeoNames.join(', ')}>
+                  <span className="text-sm font-semibold text-gray-900">
                     {formatList(selectedGeoNames)}
                   </span>
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Date</span>
-                  <span className="text-sm font-semibold text-gray-900" title={queryState.selectedDates.join(', ')}>
+                  <span className="text-sm font-semibold text-gray-900">
                     {formatList(queryState.selectedDates)}
                   </span>
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Age</span>
-                  <span className="text-sm font-semibold text-gray-900" title={queryState.selectedAges.join(', ')}>
+                  <span className="text-sm font-semibold text-gray-900">
                     {formatList(queryState.selectedAges)}
                   </span>
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sex</span>
-                  <span className="text-sm font-semibold text-gray-900">{queryState.selectedSex}</span>
+                  <span className="text-sm font-semibold text-gray-900">{queryState.selectedSex === 'All' ? 'Male, Female' : queryState.selectedSex}</span>
                 </div>
+              </div>
+
+              <div className="flex justify-end border-t border-blue-100 pt-4 mt-2">
+                <button 
+                  onClick={() => setCurrentStep('geography')}
+                  className="flex items-center gap-2 text-ons-link font-bold text-sm hover:underline"
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Edit query
+                </button>
               </div>
             </div>
 
@@ -795,18 +850,22 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-ons-text">Data Preview</h3>
                 <div className="flex bg-gray-100 p-1 rounded-md">
-                  <button 
-                    onClick={() => updateState({ format: 'crosstab' })}
-                    className={`px-3 py-1 text-xs font-bold rounded transition-all ${queryState.format === 'crosstab' ? 'bg-white text-ons-blue shadow-sm' : 'text-gray-500'}`}
-                  >
-                    Crosstab
-                  </button>
-                  <button 
-                    onClick={() => updateState({ format: 'tidy' })}
-                    className={`px-3 py-1 text-xs font-bold rounded transition-all ${queryState.format === 'tidy' ? 'bg-white text-ons-blue shadow-sm' : 'text-gray-500'}`}
-                  >
-                    Tidy
-                  </button>
+                  <Tooltip content="Multi-dimensional layout with dates as columns. Best for manual analysis and spreadsheets." align="right">
+                    <button 
+                      onClick={() => updateState({ format: 'crosstab' })}
+                      className={`px-3 py-1 text-xs font-bold rounded transition-all ${queryState.format === 'crosstab' ? 'bg-white text-ons-blue shadow-sm' : 'text-gray-500'}`}
+                    >
+                      Crosstab
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Machine-readable 'long' format with one row per value. Best for software processing and databases." align="right">
+                    <button 
+                      onClick={() => updateState({ format: 'tidy' })}
+                      className={`px-3 py-1 text-xs font-bold rounded transition-all ${queryState.format === 'tidy' ? 'bg-white text-ons-blue shadow-sm' : 'text-gray-500'}`}
+                    >
+                      Tidy
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
               <div className="border border-ons-border rounded-lg overflow-hidden bg-white">
@@ -859,20 +918,6 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
             </div>
 
             <div className="flex gap-4 pt-4">
-              <button 
-                onClick={() => setCurrentStep('geography')}
-                className="flex items-center gap-2 text-ons-link font-bold text-sm hover:underline"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                Edit query
-              </button>
-              <button 
-                onClick={onCancel}
-                className="flex items-center gap-2 text-ons-link font-bold text-sm hover:underline"
-              >
-                <Search className="w-4 h-4" />
-                New query
-              </button>
             </div>
           </div>
         );
@@ -885,7 +930,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
         {/* Sidebar Stepper */}
         <aside className="w-60 bg-white border-r border-ons-border py-6 shrink-0">
           <div className="px-6 mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">Query Steps</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">Steps</h3>
           </div>
           <div className="space-y-1">
             <button 
@@ -937,7 +982,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
             <p className="text-xs text-gray-500">Source: {dataset.source} | Updated: {dataset.lastUpdated}</p>
           </div>
 
-          <div className="flex-grow">
+          <div className="min-h-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -957,7 +1002,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
               onClick={handleBack}
               className="px-6 py-2 border border-ons-border font-bold text-sm hover:bg-gray-50 transition-colors rounded"
             >
-              {stepIndex === 0 ? 'Cancel' : 'Previous Step'}
+              {stepIndex === 0 ? 'Cancel' : 'Previous'}
             </button>
             <button
               onClick={handleNext}
@@ -979,7 +1024,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
                   selectedFormats.length > 1 ? 'Download ZIP archive' : 'Download dataset'
                 )
               ) : (
-                `Next Step: ${steps[stepIndex + 1].label} →`
+                `Next: ${steps[stepIndex + 1].label} →`
               )}
             </button>
           </div>
@@ -1006,7 +1051,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
                   </div>
                   <div className="flex justify-between border-b border-gray-200 pb-2">
                     <span className="font-bold">Sex:</span>
-                    <span className="text-ons-blue font-semibold">{queryState.selectedSex}</span>
+                    <span className="text-ons-blue font-semibold">{queryState.selectedSex === 'All' ? 'Male, Female' : queryState.selectedSex}</span>
                   </div>
                 </div>
               </div>
@@ -1014,7 +1059,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <label className="block font-bold text-ons-text text-[13px] uppercase tracking-wider">Live Data Preview</label>
-                  <span className="text-[10px] bg-blue-100 text-ons-blue px-2 py-0.5 rounded font-bold">MOCK DATA</span>
+                  <span className="text-[10px] bg-blue-100 text-ons-blue px-2 py-0.5 rounded font-bold">SAMPLE DATA</span>
                 </div>
                 <div className="bg-white border border-ons-border rounded-lg overflow-hidden shadow-sm">
                   <LivePreview queryState={queryState} compact={true} />
