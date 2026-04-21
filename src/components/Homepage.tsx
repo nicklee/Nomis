@@ -285,14 +285,14 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
 
       {/* Info Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="rounded-xl border border-ons-border bg-white px-6 py-6 md:px-8 md:py-7 shadow-sm max-w-3xl mb-12 md:mb-14">
-          <h3 className="text-lg font-bold text-ons-blue mb-3">New to NOMIS?</h3>
-          <p className="text-gray-600 leading-relaxed text-[15px] md:text-base">
-            NOMIS is a service provided by the ONS to give you free access to the most detailed and
-            up-to-date UK labour market statistics.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-12 max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
+          <div className="space-y-3">
+            <h4 className="text-xl font-bold text-ons-blue">New to NOMIS?</h4>
+            <p className="text-gray-500 leading-relaxed text-sm">
+              NOMIS is a service provided by the ONS to give you free access to the most detailed and
+              up-to-date UK labour market statistics.
+            </p>
+          </div>
           <div className="space-y-3">
             <h4 className="text-xl font-bold text-ons-blue">Powerful Analysis</h4>
             <p className="text-gray-500 leading-relaxed text-sm">
