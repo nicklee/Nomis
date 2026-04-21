@@ -215,7 +215,7 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
                       <p className="text-sm text-gray-600 max-w-lg">
                         Browse datasets by census collection. You will see all matching datasets in the catalogue.
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex flex-col gap-4 w-full">
                         {[
                           { label: 'Census 2021', query: 'Census 2021' },
                           { label: 'Census 2011', query: 'Census 2011' },
@@ -224,7 +224,7 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
                             key={label}
                             type="button"
                             onClick={() => onSearch(query)}
-                            className="flex-1 text-left p-5 rounded-xl border border-ons-border bg-white hover:border-ons-blue hover:shadow-md transition-all group"
+                            className="w-full text-left p-5 rounded-xl border border-ons-border bg-white hover:border-ons-blue hover:shadow-md transition-all group"
                           >
                             <h4 className="text-ons-link font-semibold group-hover:underline text-[16px]">
                               {label}
