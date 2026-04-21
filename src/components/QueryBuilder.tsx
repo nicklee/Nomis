@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Dataset, QueryState, StepId, GeographyType, GeographySelectionMethod, GeographyTypeCategory } from '../types';
 import { 
   Check, 
@@ -43,6 +44,13 @@ const steps: { id: StepId; label: string; icon: any }[] = [
   { id: 'review', label: 'Review & Export', icon: Eye },
 ];
 
+const STEP_IDS = steps.map(s => s.id) as readonly StepId[];
+
+function parseStepParam(raw: string | undefined): StepId {
+  if (raw && STEP_IDS.includes(raw as StepId)) return raw as StepId;
+  return 'geography';
+}
+
 function Tooltip({ children, content, align = 'center' }: { children: React.ReactNode; content: string; align?: 'center' | 'left' | 'right' }) {
   const [isVisible, setIsVisible] = useState(false);
   
@@ -83,7 +91,18 @@ function Tooltip({ children, content, align = 'center' }: { children: React.Reac
 }
 
 export default function QueryBuilder({ dataset, initialState, onCancel, onComplete }: QueryBuilderProps) {
-  const [currentStep, setCurrentStep] = useState<StepId>('geography');
+  const navigate = useNavigate();
+  const { step: stepParam } = useParams<{ step: string }>();
+
+  const currentStep = useMemo(() => parseStepParam(stepParam), [stepParam]);
+
+  const stepPath = (stepId: StepId) => `/datasets/${dataset.id}/build/${stepId}`;
+
+  useEffect(() => {
+    if (stepParam && !STEP_IDS.includes(stepParam as StepId)) {
+      navigate(stepPath('geography'), { replace: true });
+    }
+  }, [stepParam, navigate, dataset.id]);
   const [geoSearch, setGeoSearch] = useState('');
   const [ageMode, setAgeMode] = useState<AgeMode>('labour');
   const [dateMode, setDateMode] = useState<DateMode>('latest');
@@ -144,7 +163,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
       }, 2000);
     } else {
       const nextIdx = stepIndex + 1;
-      setCurrentStep(steps[nextIdx].id);
+      navigate(stepPath(steps[nextIdx].id));
     }
   };
 
@@ -152,8 +171,12 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
     if (stepIndex === 0) {
       onCancel();
     } else {
-      setCurrentStep(steps[stepIndex - 1].id);
+      navigate(stepPath(steps[stepIndex - 1].id));
     }
+  };
+
+  const goToStep = (stepId: StepId) => {
+    navigate(stepPath(stepId));
   };
 
   const updateState = (updates: Partial<QueryState>) => {
@@ -837,7 +860,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
 
               <div className="flex justify-end border-t border-blue-100 pt-4 mt-2">
                 <button 
-                  onClick={() => setCurrentStep('geography')}
+                  onClick={() => goToStep('geography')}
                   className="flex items-center gap-2 text-ons-link font-bold text-sm hover:underline"
                 >
                   <SlidersHorizontal className="w-4 h-4" />
@@ -950,7 +973,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
               return (
                 <button
                   key={step.id}
-                  onClick={() => setCurrentStep(step.id)}
+                  onClick={() => goToStep(step.id)}
                   className={`w-full px-6 py-3 flex items-center gap-3 text-sm border-l-4 transition-all ${
                     isActive 
                       ? 'border-ons-blue bg-blue-50 text-ons-blue font-semibold' 
