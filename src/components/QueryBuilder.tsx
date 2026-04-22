@@ -939,9 +939,6 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
                 </div>
               </div>
             </div>
-
-            <div className="flex gap-4 pt-4">
-            </div>
           </div>
         );
     }
@@ -949,7 +946,7 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="flex flex-grow overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Sidebar Stepper */}
         <aside className="w-60 bg-white border-r border-ons-border py-6 shrink-0">
           <div className="px-6 mb-6">
@@ -999,13 +996,13 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
         </aside>
 
         {/* Workspace */}
-        <section className="flex-grow bg-white border-r border-ons-border p-8 overflow-y-auto flex flex-col">
-          <div className="mb-8">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-white border-r border-ons-border p-6 sm:p-8">
+          <div className="mb-6 shrink-0 sm:mb-8">
             <h2 className="text-xl font-bold text-ons-blue mb-1">{dataset.title}</h2>
             <p className="text-xs text-gray-500">Source: {dataset.source} | Updated: {dataset.lastUpdated}</p>
           </div>
 
-          <div className="min-h-0">
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-4">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -1019,18 +1016,18 @@ export default function QueryBuilder({ dataset, initialState, onCancel, onComple
             </AnimatePresence>
           </div>
 
-          {/* Actions in main column */}
-          <div className="mt-12 pt-8 border-t border-ons-border flex gap-3">
+          {/* Actions in main column — shrink-0 keeps bar below scrollable content (no overlap) */}
+          <div className="mt-4 shrink-0 border-t border-ons-border pt-6 pb-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <button 
               onClick={handleBack}
-              className="px-6 py-2 border border-ons-border font-bold text-sm hover:bg-gray-50 transition-colors rounded"
+              className="w-full px-6 py-2 border border-ons-border font-bold text-sm hover:bg-gray-50 transition-colors rounded sm:w-auto"
             >
               {stepIndex === 0 ? 'Cancel' : 'Previous'}
             </button>
             <button
               onClick={handleNext}
               disabled={isDownloading}
-              className={`${isDownloaded ? 'bg-green-600' : 'bg-ons-accent'} text-white px-8 py-2 font-bold text-sm rounded hover:opacity-90 transition-all shadow-sm flex items-center gap-2 min-w-[180px] justify-center`}
+              className={`w-full sm:w-auto sm:min-w-[180px] ${isDownloaded ? 'bg-green-600' : 'bg-ons-accent'} text-white px-8 py-2 font-bold text-sm rounded hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-2`}
             >
               {isLastStep ? (
                 isDownloading ? (
