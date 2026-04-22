@@ -30,10 +30,18 @@ const topics = [
   { id: 'Population', name: 'Population', icon: Users },
 ];
 
+const reports = [
+  { id: 'la-profile', title: 'Local authority profile', desc: 'Labour market and population data for a local authority.' },
+  { id: 'ca-profile', title: 'Combined authority profile', desc: 'Data for combined authorities in England.' },
+  { id: 'ward-profile', title: '2011 ward profile', desc: 'Detailed 2011 Census data at ward level.' },
+  { id: 'census-report', title: '2021 Census local area report', desc: 'Comprehensive report from the latest census.', hasSearch: true },
+];
+
 export default function Homepage({ onSearch, onSelectTheme, onStartExploring, onSelectDataset }: HomepageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [activeTopic, setActiveTopic] = useState(topics[0].id);
+  const [censusPostcode, setCensusPostcode] = useState('');
 
   const liveResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -279,6 +287,79 @@ export default function Homepage({ onSearch, onSelectTheme, onStartExploring, on
                 </motion.div>
               </AnimatePresence>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Reports Section */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <h3 className="text-3xl font-bold text-ons-blue tracking-tight">Reports</h3>
+            </div>
+            <button 
+              onClick={() => onSearch('Reports')}
+              className="text-ons-link font-bold hover:underline text-sm"
+            >
+              View all reports
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {reports.map((report) => (
+              <div 
+                key={report.id}
+                className={`${
+                  report.id === 'census-report' 
+                    ? 'bg-blue-50' 
+                    : 'bg-white'
+                } p-6 rounded-xl border border-ons-border flex flex-col h-full hover:shadow-lg hover:border-ons-blue transition-all`}
+              >
+                <h4 className="font-bold text-ons-blue mb-2 text-[15px]">{report.title}</h4>
+                <p className="text-xs text-gray-500 mb-6 flex-1 leading-relaxed">{report.desc}</p>
+                
+                {report.hasSearch ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div>
+                        <input 
+                          type="text" 
+                          placeholder="Postcode or area"
+                          value={censusPostcode}
+                          onChange={(e) => setCensusPostcode(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              onSearch(censusPostcode);
+                            }
+                          }}
+                          className="w-full px-3 py-2 text-xs border border-ons-border rounded-md focus:outline-none focus:border-ons-blue bg-white"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => onSearch(censusPostcode)}
+                        className="w-full py-2 bg-ons-accent text-white text-[11px] font-bold rounded-md hover:opacity-90 transition-opacity"
+                      >
+                        Search
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => onSearch('2011 Census local area report')}
+                      className="text-[11px] font-bold text-ons-link hover:underline block text-left"
+                    >
+                      Go to 2011 Census local area report
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => onSearch(report.title)}
+                    className="text-ons-link text-xs font-bold hover:underline mt-auto text-left"
+                  >
+                    View profile
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
